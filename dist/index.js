@@ -191,7 +191,7 @@ const labels_1 = __nccwpck_require__(3579);
     const ticket = core.getInput('ticket');
     const fields = core.getInput('fields');
     const label = core.getInput('label');
-    const id = (_c = (_b = (_a = github === null || github === void 0 ? void 0 : github.context) === null || _a === void 0 ? void 0 : _a.payload) === null || _b === void 0 ? void 0 : _b.pull_request) === null || _c === void 0 ? void 0 : _c.id;
+    const id = (_c = (_b = (_a = github === null || github === void 0 ? void 0 : github.context) === null || _a === void 0 ? void 0 : _a.payload) === null || _b === void 0 ? void 0 : _b.pull_request) === null || _c === void 0 ? void 0 : _c.node_id;
     const labels = (_g = (_f = (_e = (_d = github === null || github === void 0 ? void 0 : github.context) === null || _d === void 0 ? void 0 : _d.payload) === null || _e === void 0 ? void 0 : _e.pull_request) === null || _f === void 0 ? void 0 : _f.labels) !== null && _g !== void 0 ? _g : [];
     if (!ticket) {
         core.info('No ticket supplied, exiting.');
@@ -210,9 +210,9 @@ const labels_1 = __nccwpck_require__(3579);
             if (label && id) {
                 await labels_1.addLabelByName({ id }, label);
             }
-            core.setFailed(missingFields
-                .map(([field]) => `Field "${field}" is missing!`)
-                .join('\n'));
+            core.setFailed(`Fields ${missingFields
+                .map(([field]) => `"${field}"`)
+                .join(', ')} are missing!`);
             return;
         }
     }

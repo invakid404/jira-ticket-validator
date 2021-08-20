@@ -10,7 +10,7 @@ import { addLabelByName, removeLabelByName } from './labels';
   const fields = core.getInput('fields');
   const label = core.getInput('label');
 
-  const id = github?.context?.payload?.pull_request?.id;
+  const id = github?.context?.payload?.pull_request?.node_id;
   const labels = github?.context?.payload?.pull_request?.labels ?? [];
 
   if (!ticket) {
@@ -37,9 +37,9 @@ import { addLabelByName, removeLabelByName } from './labels';
       }
 
       core.setFailed(
-        missingFields
-          .map(([field]) => `Field "${field}" is missing!`)
-          .join('\n'),
+        `Fields ${missingFields
+          .map(([field]) => `"${field}"`)
+          .join(', ')} are missing!`,
       );
 
       return;
