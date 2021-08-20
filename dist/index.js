@@ -75,7 +75,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const jira_1 = __nccwpck_require__(4438);
 (async () => {
-    const ticket = core.getInput('ticket', { required: true });
+    const ticket = core.getInput('ticket');
+    if (!ticket) {
+        core.info('No ticket supplied, exiting.');
+    }
     try {
         const ticketData = await jira_1.jira.findIssue(ticket);
         core.info(JSON.stringify(ticketData, null, 2));
