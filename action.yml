@@ -8,6 +8,9 @@ inputs:
   fields:
     required: false
     description: "Comma-separated list of fields to validate; action just verifies the ticket exists if not supplied"
+  label:
+    required: false
+    description: "Label to add to the PR if ticket isn't valid"
   host:
     required: true
     description: "Hostname of Jira instance"
