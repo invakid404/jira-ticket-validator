@@ -1,0 +1,6 @@
+name: 'Jira ticket validator'
+description: 'Verify that given fields exist on a Jira ticket'
+author: 'invakid404'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
