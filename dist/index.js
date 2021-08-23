@@ -29,7 +29,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.jira = void 0;
+exports.getTicket = exports.jira = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const jira_client_1 = __importDefault(__nccwpck_require__(6411));
 const host = core.getInput('host', { required: true });
@@ -43,6 +43,15 @@ exports.jira = new jira_client_1.default({
     username,
     password,
 });
+const getTicket = async (ticket) => {
+    try {
+        return await exports.jira.findIssue(ticket);
+    }
+    catch (error) {
+        return;
+    }
+};
+exports.getTicket = getTicket;
 
 
 /***/ }),
@@ -186,38 +195,41 @@ const github = __importStar(__nccwpck_require__(5438));
 const lodash_1 = __nccwpck_require__(250);
 const jira_1 = __nccwpck_require__(4438);
 const labels_1 = __nccwpck_require__(3579);
+const utils_1 = __nccwpck_require__(918);
 (async () => {
     var _a, _b, _c, _d, _e, _f, _g;
     const ticket = core.getInput('ticket');
-    const fields = core.getInput('fields');
+    const fields = core.getInput('fields').split(',');
     const label = core.getInput('label');
+    const defaultPredicate = utils_1.buildFunction(core.getInput('defaultPredicate'));
     const id = (_c = (_b = (_a = github === null || github === void 0 ? void 0 : github.context) === null || _a === void 0 ? void 0 : _a.payload) === null || _b === void 0 ? void 0 : _b.pull_request) === null || _c === void 0 ? void 0 : _c.node_id;
     const labels = (_g = (_f = (_e = (_d = github === null || github === void 0 ? void 0 : github.context) === null || _d === void 0 ? void 0 : _d.payload) === null || _e === void 0 ? void 0 : _e.pull_request) === null || _f === void 0 ? void 0 : _f.labels) !== null && _g !== void 0 ? _g : [];
     if (!ticket) {
         core.info('No ticket supplied, exiting.');
         return;
     }
-    try {
-        const ticketData = await jira_1.jira.findIssue(ticket);
-        if (!fields) {
-            return;
-        }
-        const missingFields = fields
-            .split(',')
-            .map((field) => [field, lodash_1.get(ticketData, field)])
-            .filter(([_, value]) => value == null);
-        if (missingFields.length) {
-            if (label && id) {
-                await labels_1.addLabelByName({ id }, label);
-            }
-            core.setFailed(`Fields ${missingFields
-                .map(([field]) => `"${field}"`)
-                .join(', ')} are missing!`);
-            return;
-        }
-    }
-    catch (error) {
+    const ticketData = await jira_1.getTicket(ticket);
+    if (!ticketData) {
         core.setFailed(`"${ticket}" is not a valid Jira ticket!`);
+        return;
+    }
+    const missingFields = fields
+        .map((field) => field.split(':'))
+        .map(([fieldPath, fieldFn]) => {
+        const fieldValue = lodash_1.get(ticketData, fieldPath);
+        const fieldPredicate = fieldFn
+            ? utils_1.buildFunction(fieldFn)
+            : defaultPredicate;
+        return [fieldPath, fieldPredicate(fieldValue)];
+    })
+        .filter(([_, value]) => !value);
+    if (missingFields.length) {
+        if (label && id) {
+            await labels_1.addLabelByName({ id }, label);
+        }
+        core.setFailed(`Fields ${missingFields
+            .map(([field]) => `"${field}"`)
+            .join(', ')} are invalid!`);
         return;
     }
     const hasBadLabel = labels.some((curr) => curr.name === label);
@@ -252,11 +264,13 @@ exports.octokit = graphql_1.graphql.defaults({
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.notEmpty = void 0;
+exports.buildFunction = exports.notEmpty = void 0;
 const notEmpty = (val) => {
     return val != null;
 };
 exports.notEmpty = notEmpty;
+const buildFunction = (fn) => new Function('value', `return ${fn}`);
+exports.buildFunction = buildFunction;
 
 
 /***/ }),

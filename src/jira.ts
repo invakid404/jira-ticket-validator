@@ -13,3 +13,13 @@ export const jira = new JiraApi({
   username,
   password,
 });
+
+export const getTicket = async (
+  ticket: string,
+): Promise<JiraApi.JsonResponse | undefined> => {
+  try {
+    return await jira.findIssue(ticket);
+  } catch (error) {
+    return;
+  }
+};
