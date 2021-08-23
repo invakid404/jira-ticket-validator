@@ -1,5 +1,5 @@
 name: 'Jira ticket validator'
-description: 'Verify that given fields exist on a Jira ticket'
+description: 'Verify that given fields are valid on a Jira ticket'
 author: 'invakid404'
 inputs:
   ticket:
