@@ -39,7 +39,7 @@
     "@graphql-codegen/typescript-document-nodes": "2.1.3",
     "@graphql-codegen/typescript-resolvers": "2.1.2",
     "@octokit/graphql-schema": "^10.60.1",
-    "@types/jira-client": "^6.21.2",
+    "@types/jira-client": "^6.21.3",
     "@types/lodash.get": "^4.4.6",
     "@types/node": "^16.7.10",
     "@typescript-eslint/parser": "^4.31.0",
