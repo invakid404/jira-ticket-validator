@@ -108,7 +108,7 @@ const getAllLabelsByName = async (labelName) => {
             },
         },
     };
-    const { repository: { labels }, } = await octokit_1.octokit(json_to_graphql_query_1.jsonToGraphQLQuery(request));
+    const { repository: { labels }, } = await (0, octokit_1.octokit)((0, json_to_graphql_query_1.jsonToGraphQLQuery)(request));
     return (_b = (_a = labels === null || labels === void 0 ? void 0 : labels.nodes) === null || _a === void 0 ? void 0 : _a.filter(utils_1.notEmpty)) !== null && _b !== void 0 ? _b : [];
 };
 exports.getAllLabelsByName = getAllLabelsByName;
@@ -117,16 +117,16 @@ const getLabelByName = async (labelName) => {
     if (cachedLabels.hasOwnProperty(labelName)) {
         return cachedLabels[labelName];
     }
-    const allLabels = await exports.getAllLabelsByName(labelName);
+    const allLabels = await (0, exports.getAllLabelsByName)(labelName);
     return (cachedLabels[labelName] = allLabels.find(({ name }) => name === labelName));
 };
 exports.getLabelByName = getLabelByName;
 const addLabelByName = async (target, labelName) => {
-    const label = await exports.getLabelByName(labelName);
+    const label = await (0, exports.getLabelByName)(labelName);
     if (!label) {
         return;
     }
-    await exports.addLabel(target, label);
+    await (0, exports.addLabel)(target, label);
 };
 exports.addLabelByName = addLabelByName;
 const addLabel = async (target, label) => {
@@ -134,11 +134,11 @@ const addLabel = async (target, label) => {
 };
 exports.addLabel = addLabel;
 const removeLabelByName = async (target, labelName) => {
-    const label = await exports.getLabelByName(labelName);
+    const label = await (0, exports.getLabelByName)(labelName);
     if (!label) {
         return;
     }
-    await exports.removeLabel(target, label);
+    await (0, exports.removeLabel)(target, label);
 };
 exports.removeLabelByName = removeLabelByName;
 const removeLabel = async (target, label) => {
@@ -159,7 +159,7 @@ const doLabelMutation = async (target, label, mutationType) => {
             },
         },
     };
-    await octokit_1.octokit(json_to_graphql_query_1.jsonToGraphQLQuery(request));
+    await (0, octokit_1.octokit)((0, json_to_graphql_query_1.jsonToGraphQLQuery)(request));
 };
 
 
@@ -201,14 +201,14 @@ const utils_1 = __nccwpck_require__(918);
     const ticket = core.getInput('ticket');
     const fields = core.getInput('fields').split(',');
     const label = core.getInput('label');
-    const defaultPredicate = utils_1.buildFunction(core.getInput('defaultPredicate'));
+    const defaultPredicate = (0, utils_1.buildFunction)(core.getInput('defaultPredicate'));
     const id = (_c = (_b = (_a = github === null || github === void 0 ? void 0 : github.context) === null || _a === void 0 ? void 0 : _a.payload) === null || _b === void 0 ? void 0 : _b.pull_request) === null || _c === void 0 ? void 0 : _c.node_id;
     const labels = (_g = (_f = (_e = (_d = github === null || github === void 0 ? void 0 : github.context) === null || _d === void 0 ? void 0 : _d.payload) === null || _e === void 0 ? void 0 : _e.pull_request) === null || _f === void 0 ? void 0 : _f.labels) !== null && _g !== void 0 ? _g : [];
     if (!ticket) {
         core.info('No ticket supplied, exiting.');
         return;
     }
-    const ticketData = await jira_1.getTicket(ticket);
+    const ticketData = await (0, jira_1.getTicket)(ticket);
     if (!ticketData) {
         core.setFailed(`"${ticket}" is not a valid Jira ticket!`);
         return;
@@ -216,16 +216,16 @@ const utils_1 = __nccwpck_require__(918);
     const missingFields = fields
         .map((field) => field.split(':'))
         .map(([fieldPath, fieldFn]) => {
-        const fieldValue = lodash_1.get(ticketData, fieldPath);
+        const fieldValue = (0, lodash_1.get)(ticketData, fieldPath);
         const fieldPredicate = fieldFn
-            ? utils_1.buildFunction(fieldFn)
+            ? (0, utils_1.buildFunction)(fieldFn)
             : defaultPredicate;
         return [fieldPath, fieldPredicate(fieldValue)];
     })
         .filter(([_, value]) => !value);
     if (missingFields.length) {
         if (label && id) {
-            await labels_1.addLabelByName({ id }, label);
+            await (0, labels_1.addLabelByName)({ id }, label);
         }
         core.setFailed(`Fields ${missingFields
             .map(([field]) => `"${field}"`)
@@ -234,7 +234,7 @@ const utils_1 = __nccwpck_require__(918);
     }
     const hasBadLabel = labels.some((curr) => curr.name === label);
     if (hasBadLabel && id) {
-        await labels_1.removeLabelByName({ id }, label);
+        await (0, labels_1.removeLabelByName)({ id }, label);
     }
 })();
 
@@ -2353,18 +2353,22 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 var request = __nccwpck_require__(6234);
 var universalUserAgent = __nccwpck_require__(5030);
 
-const VERSION = "4.6.4";
+const VERSION = "4.8.0";
 
-class GraphqlError extends Error {
-  constructor(request, response) {
-    const message = response.data.errors[0].message;
-    super(message);
-    Object.assign(this, response.data);
-    Object.assign(this, {
-      headers: response.headers
-    });
-    this.name = "GraphqlError";
-    this.request = request; // Maintains proper stack trace (only available on V8)
+function _buildMessageForResponseErrors(data) {
+  return `Request failed due to following response errors:\n` + data.errors.map(e => ` - ${e.message}`).join("\n");
+}
+
+class GraphqlResponseError extends Error {
+  constructor(request, headers, response) {
+    super(_buildMessageForResponseErrors(response));
+    this.request = request;
+    this.headers = headers;
+    this.response = response;
+    this.name = "GraphqlResponseError"; // Expose the errors and response data in their shorthand properties.
+
+    this.errors = response.errors;
+    this.data = response.data; // Maintains proper stack trace (only available on V8)
 
     /* istanbul ignore next */
 
@@ -2422,10 +2426,7 @@ function graphql(request, query, options) {
         headers[key] = response.headers[key];
       }
 
-      throw new GraphqlError(requestOptions, {
-        headers,
-        data: response.data
-      });
+      throw new GraphqlResponseError(requestOptions, headers, response.data);
     }
 
     return response.data.data;
@@ -2459,6 +2460,7 @@ function withCustomRequest(customRequest) {
   });
 }
 
+exports.GraphqlResponseError = GraphqlResponseError;
 exports.graphql = graphql$1;
 exports.withCustomRequest = withCustomRequest;
 //# sourceMappingURL=index.js.map
