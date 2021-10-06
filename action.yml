@@ -19,10 +19,10 @@ inputs:
     required: true
     description: "Hostname of Jira instance"
   username:
-    required: true
+    required: false
     description: "Username to use for Jira"
   password:
-    required: true
+    required: false
     description: "Password/token to use for Jira"
 runs:
   using: 'node12'

@@ -33,8 +33,8 @@ exports.getTicket = exports.jira = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const jira_client_1 = __importDefault(__nccwpck_require__(6411));
 const host = core.getInput('host', { required: true });
-const username = core.getInput('username', { required: true });
-const password = core.getInput('password', { required: true });
+const username = core.getInput('username');
+const password = core.getInput('password');
 exports.jira = new jira_client_1.default({
     protocol: 'https',
     apiVersion: '2',

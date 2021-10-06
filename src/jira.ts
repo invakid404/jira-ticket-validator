@@ -2,8 +2,8 @@ import * as core from '@actions/core';
 import JiraApi from 'jira-client';
 
 const host = core.getInput('host', { required: true });
-const username = core.getInput('username', { required: true });
-const password = core.getInput('password', { required: true });
+const username = core.getInput('username');
+const password = core.getInput('password');
 
 export const jira = new JiraApi({
   protocol: 'https',
