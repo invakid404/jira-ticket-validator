@@ -8,7 +8,7 @@ import { buildFunction } from './utils';
 
 (async (): Promise<void> => {
   const ticket = core.getInput('ticket');
-  const fields = core.getInput('fields').split(',');
+  const fields = core.getInput('fields').split(',').filter(Boolean);
   const label = core.getInput('label');
   const defaultPredicate = buildFunction(core.getInput('defaultPredicate'));
 

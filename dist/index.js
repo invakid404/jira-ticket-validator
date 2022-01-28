@@ -199,7 +199,7 @@ const utils_1 = __nccwpck_require__(918);
 (async () => {
     var _a, _b, _c, _d, _e, _f, _g;
     const ticket = core.getInput('ticket');
-    const fields = core.getInput('fields').split(',');
+    const fields = core.getInput('fields').split(',').filter(Boolean);
     const label = core.getInput('label');
     const defaultPredicate = (0, utils_1.buildFunction)(core.getInput('defaultPredicate'));
     const id = (_c = (_b = (_a = github === null || github === void 0 ? void 0 : github.context) === null || _a === void 0 ? void 0 : _a.payload) === null || _b === void 0 ? void 0 : _b.pull_request) === null || _c === void 0 ? void 0 : _c.node_id;
